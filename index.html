@@ -530,6 +530,15 @@ footer{border-top:2px solid var(--border);padding:32px 48px;display:flex;align-i
   <div class="footer-status"><div class="status-dot"></div>Open to Internship &amp; Co-op Opportunities</div>
 </footer>
 
+
+<!-- LIGHTBOX -->
+<div class="lightbox-overlay" id="lightbox">
+  <div class="lightbox-img-wrap">
+    <button class="lightbox-close" id="lightboxClose">&#x2715;</button>
+    <img id="lightboxImg" src="" alt="Project Image"/>
+  </div>
+</div>
+
 <script>
 // LOADER
 const loaderMsgs=['Initializing...','Loading CAD models...','Running simulations...','Rendering portfolio...','Ready!'];
@@ -634,6 +643,68 @@ document.addEventListener('keydown',e=>{
   if(e.keyCode===k[ki]){ki++;if(ki===k.length){ki=0;const el=document.createElement('div');el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Space Mono,monospace;font-size:18px;color:#3b5bdb;background:#fff;border:3px solid #3b5bdb;border-radius:16px;padding:28px 48px;z-index:99999;text-align:center;box-shadow:0 20px 60px rgba(59,91,219,.3)';el.innerHTML='🎉 CHEAT CODE!<br><small style="font-size:12px;color:#94a3b8">Easter Egg Found!</small>';document.body.appendChild(el);setTimeout(()=>el.remove(),3000)}}else ki=0;
 });
 
+// LIGHTBOX + SLIDESHOW
+document.addEventListener('DOMContentLoaded', function() {
+  const lightbox      = document.getElementById('lightbox');
+  const lightboxImg   = document.getElementById('lightboxImg');
+  const lightboxClose = document.getElementById('lightboxClose');
+
+  function openLightbox(src, alt) {
+    lightboxImg.src = src;
+    lightboxImg.alt = alt || '';
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', function(e) { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+
+  document.querySelectorAll('.project-img').forEach(function(img) {
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', function() { openLightbox(img.src, img.alt); });
+  });
+
+  document.querySelectorAll('[data-slideshow]').forEach(function(wrap) {
+    var slides = wrap.querySelectorAll('.slide');
+    var dots   = wrap.querySelectorAll('.slide-dot');
+    var count  = wrap.querySelector('.slide-count');
+    var cur = 0, timer;
+
+    function goTo(n) {
+      slides[cur].classList.remove('active');
+      dots[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active');
+      dots[cur].classList.add('active');
+      if (count) count.textContent = (cur + 1) + ' / ' + slides.length;
+    }
+
+    function startAuto() { timer = setInterval(function() { goTo(cur + 1); }, 3500); }
+    function stopAuto()  { clearInterval(timer); }
+
+    wrap.querySelector('.slide-next').addEventListener('click', function() { stopAuto(); goTo(cur+1); startAuto(); });
+    wrap.querySelector('.slide-prev').addEventListener('click', function() { stopAuto(); goTo(cur-1); startAuto(); });
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function() { stopAuto(); goTo(parseInt(dot.dataset.idx)); startAuto(); });
+    });
+    wrap.addEventListener('mouseenter', stopAuto);
+    wrap.addEventListener('mouseleave', startAuto);
+
+    wrap.querySelectorAll('.slide img').forEach(function(img) {
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', function() { openLightbox(img.src, img.alt); });
+    });
+
+    startAuto();
+  });
+
+});
+
 // LIGHTBOX
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
@@ -694,13 +765,5 @@ document.querySelectorAll('[data-slideshow]').forEach(wrap => {
 
 </script>
 <style>#loader{transition:opacity .5s ease}</style>
-
-<!-- LIGHTBOX -->
-<div class="lightbox-overlay" id="lightbox">
-  <div class="lightbox-img-wrap">
-    <button class="lightbox-close" id="lightboxClose">&#x2715;</button>
-    <img id="lightboxImg" src="" alt="Project Image"/>
-  </div>
-</div>
 </body>
 </html>
